@@ -2,6 +2,24 @@ from PIL import Image
 # import face_recognition_models
 import face_recognition
 import os
+from flask import Flask, render_template
+#from flask_mysqldb import MySQL
+from flask import Flask, session
+import boto3
+import traceback
+# app = Flask(__name__, template_folder='.')
+
+# app.config['MYSQL_HOST'] = 'projectsem8.c1lzaol9u5w9.us-east-2.rds.amazonaws.com'
+# app.config['MYSQL_USER'] = 'Admin'
+# app.config['MYSQL_PASSWORD'] = 'Password'
+# app.config['MYSQL_DB'] = 'details'
+# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+# init MYSQL
+# mysql = MySQL()
+# mysql.init_app(app)
+
+
+# @app.route("/", methods=['GET'])
 def hello():
     try:
         #print("Request received...")
