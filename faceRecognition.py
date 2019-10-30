@@ -125,6 +125,7 @@ def hello():
 
 
 if __name__ == "__main__":
+    #this will call Face Recognition Method
     hello()
 
 
