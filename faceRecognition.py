@@ -44,7 +44,7 @@ def downloadfiles(passportpath, testpath):
     print('downloading test images done')
 
 
-def removefiles(folder):
+def remove_files(folder):
     for the_file in os.listdir(folder):
         file_path = os.path.join(folder, the_file)
         try:
@@ -62,7 +62,7 @@ def facedetection(testimagepath):
     i = 0
     print('Total found faces are', len(face_locations))
     folder = r'C:\Users\Public\image'
-    removefiles(folder)
+    remove_files(folder)
     for face_location in face_locations:
         # Print the location of each face in this image
         top, right, bottom, left = face_location
