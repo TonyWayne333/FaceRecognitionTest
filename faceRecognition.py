@@ -3,10 +3,12 @@ from PIL import Image
 import face_recognition
 import os
 from flask import Flask, render_template
-#from flask_mysqldb import MySQL
+# from flask_mysqldb import MySQL
 from flask import Flask, session
 import boto3
 import traceback
+
+
 # app = Flask(__name__, template_folder='.')
 
 # app.config['MYSQL_HOST'] = 'projectsem8.c1lzaol9u5w9.us-east-2.rds.amazonaws.com'
@@ -22,21 +24,22 @@ import traceback
 # @app.route("/", methods=['GET'])
 def hello():
     try:
-        #print("Request received...")
+        # print("Request received...")
         # downloading files from S3
-        # s3 = boto3.client('s3')
-        # count = 0;
-        # list = s3.list_objects(Bucket='neelbucket1')['Contents']
-        # for key in list:
-            # s3.download_file('neelbucket1', key['Key'],
-                            # r'C:\Users\Public\passport\\' + key[
-                               #  'Key'])
-        #print('downloading passport images done')
-        # list = s3.list_objects(Bucket='neelbucket2')['Contents']
-        # for key in list:
-          #  s3.download_file('neelbucket2', key['Key'],
-           #                  r'C:\Users\Public\test\test.jpg')
-        #print('downloading passport images done')
+        s3 = boto3.client('s3')
+        count = 0
+        list = s3.list_objects(Bucket='neelbucket1')['Contents']
+        print(list)
+        for key in list:
+            print(key['Key'])
+            s3.download_file('neelbucket1', key['Key'],
+                             r'C:\Users\Public\passport\\' + key['Key'])
+        print('downloading passport images done')
+        list = s3.list_objects(Bucket='neelbucket2')['Contents']
+        for key in list:
+            s3.download_file('neelbucket2', key['Key'],
+                             r'C:\Users\Public\test\test.jpg')
+        print('downloading test images done')
         # Load the jpg file into a numpy array
         print("Detecting faces...")
         image = face_recognition.load_image_file(r"C:\Users\Public\test\test.jpg")
@@ -99,15 +102,15 @@ def hello():
                 if results[0] == True:
                     res = 'true'
                     print(passfile, " is matched!")
-                   # print("Updating into database...")
-                    # print(res)
-                    # print(name)
-                    # cur = mysql.connection.cursor()  # Execute
-                    # cur.execute("UPDATE students SET  Result = (%s) WHERE FileName = (%s) ", (res, name))
+                # print("Updating into database...")
+                # print(res)
+                # print(name)
+                # cur = mysql.connection.cursor()  # Execute
+                # cur.execute("UPDATE students SET  Result = (%s) WHERE FileName = (%s) ", (res, name))
 
-                    # Commit to DB
-                    # mysql.connection.commit()
-                    # break
+                # Commit to DB
+                # mysql.connection.commit()
+                # break
                 else:
                     print(passfile, " is not matched!")
 
@@ -118,14 +121,12 @@ def hello():
         print("Request served...")
         # return render_template('index.html')
     # except Exception:
-      #  traceback.print_exc()
-       # return render_template('errorInternal.html')
+    #  traceback.print_exc()
+    # return render_template('errorInternal.html')
     except Exception:
         return False
 
 
 if __name__ == "__main__":
-    #this will call Face Recognition Method
+    # this will call Face Recognition Method
     hello()
-
-
