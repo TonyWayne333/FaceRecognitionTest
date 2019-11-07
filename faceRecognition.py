@@ -7,19 +7,19 @@ import boto3
 def hello():
     try:
         print("Request received...")
-        passportpath = r'C:\Users\Public\passport\\'
-        testimagepath = r"C:\Users\Public\test\test.jpg"
+        passport_path = r'C:\Users\Public\passport\\'
+        test_image_path = r"C:\Users\Public\test\test.jpg"
         path = r'C:\Users\Public\image'
-        passPath = r'C:\Users\Public\passport'
+        pass_path = r'C:\Users\Public\passport'
 
-        #download files from S3 to the paths
-        downloadfiles(passportpath, testimagepath)
+        # download files from S3 to the paths
+        download_files(passport_path, test_image_path)
 
-        #detect faces from a group photo
-        facedetection(testimagepath)
+        # detect faces from a group photo
+        face_detection(test_image_path)
 
         # now face recognition
-        facerecognition(path, passPath)
+        face_recognition_proj(path, pass_path)
 
         print("Request served...")
 
@@ -27,20 +27,20 @@ def hello():
         return False
 
 
-def downloadfiles(passportpath, testpath):
+def download_files(passport_path, test_image_path):
     # downloading files from S3
     s3 = boto3.client('s3')
-    list = s3.list_objects(Bucket='neelbucket1')['Contents']
-    print(list)
-    for key in list:
+    list_images = s3.list_objects(Bucket='neelbucket1')['Contents']
+    print(list_images)
+    for key in list_images:
         print(key['Key'])
         s3.download_file('neelbucket1', key['Key'],
-                         passportpath + key['Key'])
+                         passport_path + key['Key'])
     print('downloading passport images done')
-    list = s3.list_objects(Bucket='neelbucket2')['Contents']
-    for key in list:
+    list_images = s3.list_objects(Bucket='neelbucket2')['Contents']
+    for key in list_images:
         s3.download_file('neelbucket2', key['Key'],
-                         testpath)
+                         test_image_path)
     print('downloading test images done')
 
 
@@ -54,9 +54,10 @@ def remove_files(folder):
             print(e)
     print("Folder is now empty")
 
-def facedetection(testimagepath):
+
+def face_detection(test_image_path):
     print("Detecting faces...")
-    image = face_recognition.load_image_file(testimagepath)
+    image = face_recognition.load_image_file(test_image_path)
     print("Progress")
     face_locations = face_recognition.face_locations(image)
     i = 0
@@ -79,18 +80,18 @@ def facedetection(testimagepath):
         i = i + 1
 
 
-def facerecognition(path, passPath):
-    passfiles = os.listdir(passPath)
+def face_recognition_proj(path, pass_path):
+    pass_files = os.listdir(pass_path)
     print("face recognition...")
-    imgfiles = os.listdir(path)
-    print(len(imgfiles))
+    img_files = os.listdir(path)
+    print(len(img_files))
     name = "s"
-    for passfile in passfiles:
+    for pass_file in pass_files:
         res = 'false'
-        print("matching for ", passfile)
-        known_image = face_recognition.load_image_file(passPath + "\\" + passfile)
-        name = passfile
-        for img in imgfiles:
+        print("matching for ", pass_file)
+        known_image = face_recognition.load_image_file(pass_path + "\\" + pass_file)
+        name = pass_file
+        for img in img_files:
             print("Scanning file ", img)
             unknown_image = face_recognition.load_image_file(
                 r"C:\Users\Public\image\{}".format(img))
@@ -103,9 +104,9 @@ def facerecognition(path, passPath):
             results = face_recognition.compare_faces([known_encoding], unknown_encoding, tolerance=0.5)
             print(results)
             if results[0]:
-                print(passfile, " is matched!")
+                print(pass_file, " is matched!")
             else:
-                print(passfile, " is not matched!")
+                print(pass_file, " is not matched!")
 
 
 if __name__ == "__main__":
