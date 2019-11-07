@@ -19,7 +19,7 @@ def hello():
         face_detection(test_image_path)
 
         # now face recognition
-        face_recognition_proj(path, pass_path)
+        face_recognition_project(path, pass_path)
 
         print("Request served...")
 
@@ -80,7 +80,7 @@ def face_detection(test_image_path):
         i = i + 1
 
 
-def face_recognition_proj(path, pass_path):
+def face_recognition_project(path, pass_path):
     pass_files = os.listdir(pass_path)
     print("face recognition...")
     img_files = os.listdir(path)
