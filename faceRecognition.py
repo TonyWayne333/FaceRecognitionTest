@@ -2,6 +2,8 @@ from PIL import Image
 import face_recognition
 import os
 import boto3
+import mysql.connector
+from mysql.connector import Error
 
 
 def hello():
@@ -12,6 +14,8 @@ def hello():
         path = r'C:\Users\Public\image'
         pass_path = r'C:\Users\Public\passport'
 
+        # Remove pre-files from folder
+        remove_files(pass_path)
         # download files from S3 to the paths
         download_files(passport_path, test_image_path)
 
@@ -85,28 +89,48 @@ def face_recognition_project(path, pass_path):
     print("face recognition...")
     img_files = os.listdir(path)
     print(len(img_files))
-    name = "s"
-    for pass_file in pass_files:
-        res = 'false'
-        print("matching for ", pass_file)
-        known_image = face_recognition.load_image_file(pass_path + "\\" + pass_file)
-        name = pass_file
-        for img in img_files:
-            print("Scanning file ", img)
-            unknown_image = face_recognition.load_image_file(
-                r"C:\Users\Public\image\{}".format(img))
-            known_encoding = face_recognition.face_encodings(known_image)[0]
-            a = face_recognition.face_encodings(unknown_image)
-            if len(a) <= 0:
-                return 0
-            unknown_encoding = face_recognition.face_encodings(unknown_image)[0]
+    try:
+        connection = mysql.connector.connect(host='localhost',
+                                             database='softwaredevelopment',
+                                             user='root',
+                                             password='password')
 
-            results = face_recognition.compare_faces([known_encoding], unknown_encoding, tolerance=0.5)
-            print(results)
-            if results[0]:
-                print(pass_file, " is matched!")
-            else:
-                print(pass_file, " is not matched!")
+        cursor = connection.cursor()
+
+        for pass_file in pass_files:
+            res = True
+            print("matching for ", pass_file)
+            known_image = face_recognition.load_image_file(pass_path + "\\" + pass_file)
+            name = pass_file
+            for img in img_files:
+                print("Scanning file ", img)
+                unknown_image = face_recognition.load_image_file(
+                    r"C:\Users\Public\image\{}".format(img))
+                known_encoding = face_recognition.face_encodings(known_image)[0]
+                a = face_recognition.face_encodings(unknown_image)
+                if len(a) <= 0:
+                    return 0
+                unknown_encoding = face_recognition.face_encodings(unknown_image)[0]
+
+                results = face_recognition.compare_faces([known_encoding], unknown_encoding, tolerance=0.5)
+                print(results)
+                if results[0]:
+                    print(pass_file, " is matched!")
+                    sql = "UPDATE Student SET presence = 'True' WHERE imageName = '" + name + "'"
+                    cursor.execute(sql)
+                    connection.commit()
+
+                    print(cursor.rowcount, "record(s) affected")
+                else:
+                    print(pass_file, " is not matched!")
+    except mysql.connector.Error as error:
+        print("Failed to read data from MySQL table {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
 
 
 if __name__ == "__main__":
