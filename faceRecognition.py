@@ -3,10 +3,13 @@ import face_recognition
 import os
 import boto3
 import mysql.connector
-from mysql.connector import Error
+from flask import Flask, jsonify
+
+app = Flask(__name__)
 
 
-def hello():
+@app.route('/image_recognition/')
+def image_recognition_call():
     try:
         print("Request received...")
         passport_path = r'C:\Users\Public\passport\\'
@@ -26,9 +29,9 @@ def hello():
         face_recognition_project(path, pass_path)
 
         print("Request served...")
-
+        return jsonify(status=200, message="Success")
     except Exception:
-        return False
+        return jsonify(status=500, message="Error")
 
 
 def download_files(passport_path, test_image_path):
@@ -134,5 +137,4 @@ def face_recognition_project(path, pass_path):
 
 
 if __name__ == "__main__":
-    # this will call Face Recognition Method
-    hello()
+    app.run(debug=True)
