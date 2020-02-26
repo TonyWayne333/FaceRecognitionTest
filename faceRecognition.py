@@ -2,7 +2,7 @@ import os
 import boto3
 import face_recognition
 from PIL import Image
-from flask import Flask, jsonify, render_template
+from flask import Flask, render_template
 from pymongo import MongoClient
 from pymongo import errors
 
