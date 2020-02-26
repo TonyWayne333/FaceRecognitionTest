@@ -1,11 +1,12 @@
-from PIL import Image
-import face_recognition
 import os
 import boto3
-import mysql.connector
-from flask import Flask, jsonify
+import face_recognition
+from PIL import Image
+from flask import Flask, jsonify, render_template
+from pymongo import MongoClient
+from pymongo import errors
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 
 
 @app.route('/image_recognition/')
@@ -29,14 +30,18 @@ def image_recognition_call():
         face_recognition_project(path, pass_path)
 
         print("Request served...")
-        return jsonify(status=200, message="Success")
+        return render_template('index.html')
+
     except Exception:
-        return jsonify(status=500, message="Error")
+        print("Inside Exception")
+        return render_template('error.html')
 
 
 def download_files(passport_path, test_image_path):
+    ACCESS_KEY = 'Your_Access_Key'
+    SECRET_KEY = 'Your_Secret_Key'
     # downloading files from S3
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3',    aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
     list_images = s3.list_objects(Bucket='neelbucket1')['Contents']
     print(list_images)
     for key in list_images:
@@ -93,13 +98,12 @@ def face_recognition_project(path, pass_path):
     img_files = os.listdir(path)
     print(len(img_files))
     try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='softwaredevelopment',
-                                             user='root',
-                                             password='password')
-
-        cursor = connection.cursor()
-
+        print("Trying to connect Mongo DB")
+        client = MongoClient(
+            "mongodb://admin:adminpassword@neelmongoserver-shard-00-00-kwu6r.mongodb.net:27017,neelmongoserver-shard-00-01-kwu6r.mongodb.net:27017,neelmongoserver-shard-00-02-kwu6r.mongodb.net:27017/test?ssl=true&replicaSet=NeelMongoServer-shard-0&authSource=admin&retryWrites=true&w=majority")
+        print("DB Connected")
+        db = client.get_database("softwaredevelopmentproject")
+        result = db.student
         for pass_file in pass_files:
             res = True
             print("matching for ", pass_file)
@@ -119,21 +123,13 @@ def face_recognition_project(path, pass_path):
                 print(results)
                 if results[0]:
                     print(pass_file, " is matched!")
-                    sql = "UPDATE Student SET presence = 'True' WHERE imageName = '" + name + "'"
-                    cursor.execute(sql)
-                    connection.commit()
-
-                    print(cursor.rowcount, "record(s) affected")
+                    result.update_one({"imageName": name}, {"$set": {"presence": "True"}})
+                    print('Student data updated')
                 else:
                     print(pass_file, " is not matched!")
-    except mysql.connector.Error as error:
-        print("Failed to read data from MySQL table {}".format(error))
 
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("MySQL connection is closed")
+    except errors.OperationFailure as error:
+        print("Failed to read data from mongo DB ".format(error))
 
 
 if __name__ == "__main__":
